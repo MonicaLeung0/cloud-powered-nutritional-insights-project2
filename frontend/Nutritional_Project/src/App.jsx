@@ -104,7 +104,8 @@ const nutrientColors = {
   'Fat(g)': '#f59e0b',
 }
 
-const API_BASE_URL = "https://group8projec2nutriinsightapi.azurewebsites.net/api" // made changes ny anmol
+// Backend API base URL - Anmol
+const API_BASE_URL = "https://group8projec2nutriinsightapi.azurewebsites.net/api"
 
 const toNumber = (value) => {
   const parsed = Number(value)
@@ -128,10 +129,18 @@ function App() {
   const activeChart = chartCards.find((chart) => chart.id === activeChartId) ?? null
   const inactiveCharts = chartCards.filter((chart) => chart.id !== activeChartId)
 
+  // Dynamic diet options based on active dataset - Anmol
   const dietOptions = useMemo(() => {
-    const optionSet = new Set(insights.map((item) => item.dietType).filter(Boolean))
+    const source =
+      activeDataset === 'recipes'
+        ? recipes
+        : activeDataset === 'clusters'
+        ? clusters
+        : insights
+
+    const optionSet = new Set(source.map((item) => item.dietType).filter(Boolean))
     return ['all', ...optionSet]
-  }, [insights])
+  }, [activeDataset, insights, recipes, clusters])
 
   const filteredInsights = useMemo(() => {
     const searchValue = filters.searchDietType.trim().toLowerCase()
@@ -143,8 +152,27 @@ function App() {
     })
   }, [filters.searchDietType, filters.selectedDietType, insights])
 
+  // Recipe filtering by search and dropdown - Anmol
+  const filteredRecipes = useMemo(() => {
+    const searchValue = filters.searchDietType.trim().toLowerCase()
+    return recipes.filter((item) => {
+      const matchesSearch = item.dietType.toLowerCase().includes(searchValue)
+      const matchesSelect =
+        filters.selectedDietType === 'all' || item.dietType === filters.selectedDietType
+      return matchesSearch && matchesSelect
+    })
+  }, [filters.searchDietType, filters.selectedDietType, recipes])
+
+  // Pagination source based on selected dataset - Anmol
+  const activeItems = useMemo(() => {
+    if (activeDataset === 'recipes') return filteredRecipes
+    if (activeDataset === 'clusters') return clusters
+    return filteredInsights
+  }, [activeDataset, filteredInsights, filteredRecipes, clusters])
+
+  // Shared pagination metadata for active table - Anmol
   const paginationMeta = useMemo(() => {
-    const totalItems = filteredInsights.length
+    const totalItems = activeItems.length
     const totalPages = Math.max(1, Math.ceil(totalItems / filters.pageSize))
     const safeCurrentPage = Math.min(filters.currentPage, totalPages)
     return {
@@ -154,13 +182,27 @@ function App() {
       currentPage: safeCurrentPage,
       pageSize: filters.pageSize,
     }
-  }, [filteredInsights.length, filters.currentPage, filters.pageSize])
+  }, [activeItems, filters.currentPage, filters.pageSize])
 
   const pagedInsights = useMemo(() => {
     const startIndex = (paginationMeta.currentPage - 1) * paginationMeta.pageSize
     const endIndex = startIndex + paginationMeta.pageSize
     return filteredInsights.slice(startIndex, endIndex)
   }, [filteredInsights, paginationMeta.currentPage, paginationMeta.pageSize])
+
+  // Paginated recipe rows for current page - Anmol
+  const pagedRecipes = useMemo(() => {
+    const startIndex = (paginationMeta.currentPage - 1) * paginationMeta.pageSize
+    const endIndex = startIndex + paginationMeta.pageSize
+    return filteredRecipes.slice(startIndex, endIndex)
+  }, [filteredRecipes, paginationMeta.currentPage, paginationMeta.pageSize])
+
+  // Paginated cluster rows for current page - Anmol
+  const pagedClusters = useMemo(() => {
+    const startIndex = (paginationMeta.currentPage - 1) * paginationMeta.pageSize
+    const endIndex = startIndex + paginationMeta.pageSize
+    return clusters.slice(startIndex, endIndex)
+  }, [clusters, paginationMeta.currentPage, paginationMeta.pageSize])
 
   const chartMetrics = useMemo(() => {
     const groupedByDiet = new Map()
@@ -312,7 +354,7 @@ function App() {
     }))
   }
  
-  // made changes ny anmol
+  // Insights button connected to backend API - Anmol
   const handleGetInsights = async () => {
 
     try {
@@ -339,6 +381,7 @@ function App() {
 
       setInsights(mappedInsights)
       setActiveDataset('insights')
+      setFilters((previous) => ({ ...previous, currentPage: 1 }))
       setApiStatus(`Insights loaded from backend (${payload.Data.length} records).`)
     } catch (error) {
       console.error(error)
@@ -346,16 +389,104 @@ function App() {
     }
   }
 
-  const handleGetRecipes = () => {
-    setRecipes(placeholderRecipeApiRows.map((row) => ({ ...recipeModel, ...toRecipe(row) })))
-    setActiveDataset('recipes')
-    setApiStatus(`Recipes placeholder loaded (${placeholderRecipeApiRows.length} records).`)
+ // Recipes button connected to backend API - Anmol
+  const handleGetRecipes = async () => {
+    try {
+      setApiStatus('Loading recipes from backend...')
+
+      const response = await fetch(
+        `${API_BASE_URL}/nutritional_data?page=1&page_size=10000`
+      )
+
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`)
+      }
+
+      const payload = await response.json()
+
+      if (!payload.Success) {
+        throw new Error(payload.Message || 'API returned an unsuccessful response')
+      }
+
+      const mappedRecipes = payload.Data.map((row) => ({
+        ...recipeModel,
+        ...toRecipe(row),
+      }))
+
+      setRecipes(mappedRecipes)
+      setActiveDataset('recipes')
+      setFilters((previous) => ({ ...previous, currentPage: 1 }))
+      setApiStatus(`Recipes loaded from backend (${payload.Data.length} records).`)
+    } catch (error) {
+      console.error(error)
+      setApiStatus(`Failed to load recipes: ${error.message}`)
+    }
   }
 
-  const handleGetClusters = () => {
-    setClusters(placeholderClusterApiRows.map((row) => ({ ...clusterModel, ...toCluster(row) })))
-    setActiveDataset('clusters')
-    setApiStatus(`Clusters placeholder loaded (${placeholderClusterApiRows.length} records).`)
+  // Cluster data grouped from backend response - Anmol
+  const handleGetClusters = async () => {
+    try {
+      setApiStatus('Loading clusters from backend...')
+
+      const response = await fetch(
+        `${API_BASE_URL}/nutritional_data?page=1&page_size=10000`
+      ) 
+
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`)
+      }
+
+      const payload = await response.json()
+
+      if (!payload.Success) {
+        throw new Error(payload.Message || 'API returned an unsuccessful response')
+      }
+
+      const grouped = new Map()
+
+      payload.Data.forEach((row) => {
+        const dietType = String(row.Diet_type ?? '').trim().toLowerCase()
+        if (!dietType) return
+
+        const current = grouped.get(dietType) ?? {
+          clusterId: grouped.size + 1,
+          Diet_type: dietType,
+          Recipe_count: 0,
+          'Protein(g)': 0,
+          'Carbs(g)': 0,
+          'Fat(g)': 0,
+        }
+
+        current.Recipe_count += 1
+        current['Protein(g)'] += Number(row['Protein(g)'] ?? 0)
+        current['Carbs(g)'] += Number(row['Carbs(g)'] ?? 0)
+        current['Fat(g)'] += Number(row['Fat(g)'] ?? 0)
+
+        grouped.set(dietType, current)
+      })
+
+      const clusterRows = [...grouped.values()].map((item) => ({
+        clusterId: item.clusterId,
+        Diet_type: item.Diet_type,
+        Recipe_count: item.Recipe_count,
+        'Protein(g)': item.Recipe_count ? item['Protein(g)'] / item.Recipe_count : 0,
+        'Carbs(g)': item.Recipe_count ? item['Carbs(g)'] / item.Recipe_count : 0,
+        'Fat(g)': item.Recipe_count ? item['Fat(g)'] / item.Recipe_count : 0,
+      }))
+
+      const mappedClusters = clusterRows.map((row) => ({
+        ...clusterModel,
+        ...toCluster(row),
+      }))
+
+      setClusters(mappedClusters)
+      setActiveDataset('clusters')
+      setFilters((previous) => ({ ...previous, currentPage: 1 }))
+      setApiStatus(`Clusters loaded from backend (${mappedClusters.length} groups).`)
+    } catch (error) {
+      console.error(error)
+      setApiStatus(`Failed to load clusters: ${error.message}`)
+    }
   }
 
   const handleChartSelect = (chartId) => {
@@ -563,8 +694,8 @@ function App() {
           <DataPreviewPanel
             activeDataset={activeDataset}
             insightsPage={pagedInsights}
-            recipes={recipes}
-            clusters={clusters}
+            recipes={pagedRecipes}
+            clusters={pagedClusters}
             paginationMeta={paginationMeta}
           />
           <PaginationControls
