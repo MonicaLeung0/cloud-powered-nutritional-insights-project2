@@ -6,7 +6,7 @@ function DataPreviewPanel({ activeDataset, insightsPage, recipes, clusters, pagi
   if (activeDataset === 'recipes') {
     return (
       <div className="data-preview">
-        <h3>Recipe Placeholder Data</h3>
+        <h3>Recipe Data</h3>
         <div className="table-wrap">
           <table>
             <thead>
@@ -40,7 +40,7 @@ function DataPreviewPanel({ activeDataset, insightsPage, recipes, clusters, pagi
   if (activeDataset === 'clusters') {
     return (
       <div className="data-preview">
-        <h3>Cluster Placeholder Data</h3>
+        <h3>Cluster Data</h3>
         <div className="table-wrap">
           <table>
             <thead>
@@ -73,7 +73,7 @@ function DataPreviewPanel({ activeDataset, insightsPage, recipes, clusters, pagi
 
   return (
     <div className="data-preview">
-      <h3>Nutritional Insight Placeholder Data</h3>
+      <h3>Nutritional Insight Data</h3>
       <p className="preview-meta">
         Showing page {paginationMeta.currentPage} of {paginationMeta.totalPages} ({paginationMeta.totalItems}{' '}
         records)

@@ -104,7 +104,7 @@ const nutrientColors = {
   'Fat(g)': '#f59e0b',
 }
 
-const API_BASE_URL = "https://group8projec2nutriinsightapi.azurewebsites.net/api"
+const API_BASE_URL = "https://group8projec2nutriinsightapi.azurewebsites.net/api" // made changes ny anmol
 
 const toNumber = (value) => {
   const parsed = Number(value)
@@ -311,14 +311,15 @@ function App() {
       currentPage: Math.min(paginationMeta.totalPages, previous.currentPage + 1),
     }))
   }
-
+ 
+  // made changes ny anmol
   const handleGetInsights = async () => {
 
     try {
       setApiStatus('Loading insights from backend...')
 
       const response = await fetch(
-        `${API_BASE_URL}/nutritional_data?page=1&page_size=50`
+        `${API_BASE_URL}/nutritional_data?page=1&page_size=10000`
       )
 
       if (!response.ok) {
