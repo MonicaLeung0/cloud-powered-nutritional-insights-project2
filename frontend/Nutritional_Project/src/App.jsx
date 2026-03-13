@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   ArcElement,
   BarElement,
@@ -16,7 +16,6 @@ import ApiActionControls from './components/ApiActionControls'
 import DataPreviewPanel from './components/DataPreviewPanel'
 import FilterControls from './components/FilterControls'
 import PaginationControls from './components/PaginationControls'
-import allDietsRows from '../example/all_diets.json'
 import {
   clusterModel,
   filterPaginationModel,
@@ -204,11 +203,12 @@ function App() {
     return clusters.slice(startIndex, endIndex)
   }, [clusters, paginationMeta.currentPage, paginationMeta.pageSize])
 
+  // Chart metrics update with filtered insight data - Anmol
   const chartMetrics = useMemo(() => {
     const groupedByDiet = new Map()
 
-    allDietsRows.forEach((row) => {
-      const dietType = String(row.Diet_type ?? '').trim().toLowerCase()
+    filteredInsights.forEach((row) => {
+      const dietType = String(row.dietType ?? '').trim().toLowerCase()
       if (!dietType) {
         return
       }
@@ -222,9 +222,9 @@ function App() {
       }
 
       current.count += 1
-      current.protein += toNumber(row['Protein(g)'])
-      current.carbs += toNumber(row['Carbs(g)'])
-      current.fat += toNumber(row['Fat(g)'])
+      current.protein += toNumber(row.proteinG)
+      current.carbs += toNumber(row.carbsG)
+      current.fat += toNumber(row.fatG)
       groupedByDiet.set(dietType, current)
     })
 
@@ -245,9 +245,9 @@ function App() {
     return {
       diets,
       maxAvgMacro,
-      totalRows: allDietsRows.length,
+      totalRows: filteredInsights.length,
     }
-  }, [])
+  }, [filteredInsights])
 
   const barChartData = useMemo(
     () => ({
@@ -489,6 +489,11 @@ function App() {
     }
   }
 
+  // Load backend insights on initial page render - Anmol
+  useEffect(() => {
+    handleGetInsights()
+  }, [])
+
   const handleChartSelect = (chartId) => {
     setActiveChartId((previous) => (previous === chartId ? null : chartId))
   }
@@ -661,8 +666,7 @@ function App() {
             )}
           </div>
           <p className="chart-footnote">
-            Charts are rendered from `all_diets.json` ({chartMetrics.totalRows} records) as a backend API
-            placeholder.
+            Charts are rendered from backend data ({chartMetrics.totalRows} records).
           </p>
         </section>
 
