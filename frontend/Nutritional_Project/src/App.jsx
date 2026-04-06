@@ -15,7 +15,9 @@ import './App.css'
 import ApiActionControls from './components/ApiActionControls'
 import DataPreviewPanel from './components/DataPreviewPanel'
 import FilterControls from './components/FilterControls'
+import OAuthTwoFactorCard from './components/OAuthTwoFactorCard'
 import PaginationControls from './components/PaginationControls'
+import SecurityComplianceCard from './components/SecurityComplianceCard'
 import allDietsRows from '../example/all_diets.json'
 import {
   clusterModel,
@@ -570,6 +572,16 @@ function App() {
             recipeCount={recipes.length}
             clusterCount={clusters.length}
           />
+        </section>
+
+        <section className="section-block">
+          <h2>Security &amp; Compliance</h2>
+          <SecurityComplianceCard />
+        </section>
+
+        <section className="section-block">
+          <h2>OAuth &amp; 2FA Integration</h2>
+          <OAuthTwoFactorCard />
         </section>
 
         <section className="section-block">

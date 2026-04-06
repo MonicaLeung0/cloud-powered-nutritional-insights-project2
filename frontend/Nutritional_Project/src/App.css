@@ -1,6 +1,6 @@
 .app-page {
   min-height: 100vh;
-  background-color: #f2f4f7;
+  background-color: #f8f9fa;
 }
 
 .app-header {
@@ -314,6 +314,81 @@
   background-color: #f8fafc;
 }
 
+.security-card,
+.oauth-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08);
+  padding: 18px 20px;
+}
+
+.security-card__title,
+.oauth-card__title {
+  margin: 0 0 12px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.security-card__list {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+  font-size: 16px;
+  color: #374151;
+  line-height: 1.7;
+}
+
+.security-card__ok {
+  color: #059669;
+  font-weight: 600;
+}
+
+.oauth-card__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.oauth-button {
+  border: 0;
+  border-radius: 6px;
+  background-color: #1d4ed8;
+  color: #ffffff;
+  height: 48px;
+  padding: 0 22px;
+  font-size: 17px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.oauth-button:hover {
+  background-color: #1e40af;
+}
+
+.oauth-card__label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.oauth-card__input {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  height: 48px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 18px;
+  padding: 0 14px;
+  color: #1f2937;
+  background-color: #ffffff;
+}
+
 .cleanup-card {
   background-color: #ffffff;
   border: 1px solid #e2e8f0;
@@ -399,6 +474,14 @@
 
   .button-row button {
     font-size: 16px;
+  }
+
+  .oauth-card__buttons {
+    flex-direction: column;
+  }
+
+  .oauth-button {
+    width: 100%;
   }
 
   .app-footer p {
