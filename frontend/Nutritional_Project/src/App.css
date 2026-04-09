@@ -488,3 +488,52 @@
     font-size: 18px;
   }
 }
+
+
+
+
+/*
+   ADDITIONAL CSS FOR SecurityComplianceCard
+*/
+
+.security-card__loading {
+  font-size: 15px;
+  color: #6b7280;
+  margin: 0;
+  animation: securityPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes securityPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ── Error state ── */
+.security-card__error {
+  font-size: 15px;
+  color: #dc2626;
+  margin: 0 0 12px;
+}
+
+/* ── Retry button ── */
+.security-card__retry {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background-color: #f3f4f6;
+  color: #374151;
+  height: 40px;
+  padding: 0 18px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.security-card__retry:hover {
+  background-color: #e5e7eb;
+}
+
+/* ── Timestamp shown after successful check ── */
+.security-card__timestamp {
+  margin: 14px 0 0;
+  font-size: 13px;
+  color: #9ca3af;
+}
